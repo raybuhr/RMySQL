@@ -11,14 +11,17 @@ services:
 
 matrix:
   include:
-    - addons:
+    - os: linux
+      addons:
         apt:
           packages:
             - libmysqlclient-dev
-    - addons:
+    - os: linux
+      addons:
         apt:
           packages:
             - libmariadb-client-lgpl-dev
+    - os: osx
 
 #r_check_revdep: true
 
