@@ -6,9 +6,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 
-const char* as_api_string(const Rcpp::Nullable<std::string>& cpp_string) {
-  return cpp_string.isNull() ? NULL : Rcpp::as<std::string>(cpp_string).c_str();
-}
+const char* as_api_string(const Rcpp::Nullable<Rcpp::CharacterVector>& cpp_string,
+                          const char* arg);
 
 class MyResult;
 
@@ -22,20 +21,20 @@ class MyConnection : boost::noncopyable {
 
 public:
 
-  MyConnection(const Rcpp::Nullable<std::string>& host,
-               const Rcpp::Nullable<std::string>& user,
-               const Rcpp::Nullable<std::string>& password,
-               const Rcpp::Nullable<std::string>& db,
+  MyConnection(const Rcpp::Nullable<Rcpp::CharacterVector>& host,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& user,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& password,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& db,
                unsigned int port,
-               const Rcpp::Nullable<std::string>& unix_socket,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& unix_socket,
                unsigned long client_flag,
-               const Rcpp::Nullable<std::string>& groups,
-               const Rcpp::Nullable<std::string>& default_file,
-               const Rcpp::Nullable<std::string>& ssl_key,
-               const Rcpp::Nullable<std::string>& ssl_cert,
-               const Rcpp::Nullable<std::string>& ssl_ca,
-               const Rcpp::Nullable<std::string>& ssl_capath,
-               const Rcpp::Nullable<std::string>& ssl_cipher) :
+               const Rcpp::Nullable<Rcpp::CharacterVector>& groups,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& default_file,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& ssl_key,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& ssl_cert,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& ssl_ca,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& ssl_capath,
+               const Rcpp::Nullable<Rcpp::CharacterVector>& ssl_cipher) :
     pCurrentResult_(NULL)
   {
     pConn_ = mysql_init(NULL);
@@ -45,31 +44,31 @@ public:
     mysql_options(pConn_, MYSQL_SET_CHARSET_NAME, "UTF8");
 
     if (!groups.isNull())
-      mysql_options(pConn_, MYSQL_READ_DEFAULT_GROUP, as_api_string(groups));
+      mysql_options(pConn_, MYSQL_READ_DEFAULT_GROUP, as_api_string(groups, "groups"));
 
     if (!default_file.isNull())
       mysql_options(pConn_, MYSQL_READ_DEFAULT_FILE,
-                    as_api_string(default_file));
+                    as_api_string(default_file, "default_file"));
 
     if (!ssl_key.isNull() || !ssl_cert.isNull() || !ssl_ca.isNull() ||
         !ssl_capath.isNull() || !ssl_cipher.isNull()) {
       mysql_ssl_set(
         pConn_,
-        as_api_string(ssl_key),
-        as_api_string(ssl_cert),
-        as_api_string(ssl_ca),
-        as_api_string(ssl_capath),
-        as_api_string(ssl_cipher)
+        as_api_string(ssl_key, "ssl_key"),
+        as_api_string(ssl_cert, "ssl_cert"),
+        as_api_string(ssl_ca, "ssl_ca"),
+        as_api_string(ssl_capath, "ssl_capath"),
+        as_api_string(ssl_cipher, "ssl_cipher")
       );
     }
 
     if (!mysql_real_connect(pConn_,
-        as_api_string(host),
-        as_api_string(user),
-        as_api_string(password),
-        as_api_string(db),
+        as_api_string(host, "host"),
+        as_api_string(user, "user"),
+        as_api_string(password, "password"),
+        as_api_string(db, "db"),
         port,
-        as_api_string(unix_socket),
+        as_api_string(unix_socket, "unix_socket"),
         client_flag)) {
       mysql_close(pConn_);
       Rcpp::stop("Failed to connect: %s", mysql_error(pConn_));
