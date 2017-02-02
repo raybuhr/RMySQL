@@ -10,3 +10,4 @@ dbEscapeStrings(con, strings, ...)
 DEPRECATED: Please use \code{dbQuoteString} instead.
 }
 \keyword{internal}
+

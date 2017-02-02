@@ -2,10 +2,10 @@
 % Please edit documentation in R/transaction.R
 \docType{methods}
 \name{transactions}
-\alias{transactions}
-\alias{dbCommit,MySQLConnection-method}
 \alias{dbBegin,MySQLConnection-method}
+\alias{dbCommit,MySQLConnection-method}
 \alias{dbRollback,MySQLConnection-method}
+\alias{transactions}
 \title{DBMS Transaction Management}
 \usage{
 \S4method{dbCommit}{MySQLConnection}(conn, ...)
@@ -42,3 +42,4 @@ dbRemoveTable(con, "df")
 dbDisconnect(con)
 }
 }
+

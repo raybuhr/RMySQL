@@ -2,13 +2,14 @@
 % Please edit documentation in R/table.R
 \docType{methods}
 \name{mysql-tables}
-\alias{mysql-tables}
-\alias{dbReadTable,MySQLConnection,character-method}
-\alias{dbWriteTable,MySQLConnection,character,data.frame-method}
-\alias{dbWriteTable,MySQLConnection,character,character-method}
-\alias{dbListTables,MySQLConnection-method}
 \alias{dbExistsTable,MySQLConnection,character-method}
+\alias{dbListTables,MySQLConnection-method}
+\alias{dbReadTable,MySQLConnection,character-method}
 \alias{dbRemoveTable,MySQLConnection,character-method}
+\alias{dbUpsertTable,MySQLConnection,character,data.frame-method}
+\alias{dbWriteTable,MySQLConnection,character,character-method}
+\alias{dbWriteTable,MySQLConnection,character,data.frame-method}
+\alias{mysql-tables}
 \title{Read and write MySQL tables.}
 \usage{
 \S4method{dbReadTable}{MySQLConnection,character}(conn, name, row.names = NA,
@@ -28,6 +29,9 @@
 \S4method{dbExistsTable}{MySQLConnection,character}(conn, name, ...)
 
 \S4method{dbRemoveTable}{MySQLConnection,character}(conn, name, ...)
+
+\S4method{dbUpsertTable}{MySQLConnection,character,data.frame}(conn, name,
+  value, row.names = FALSE, temporary = FALSE)
 }
 \arguments{
 \item{conn}{a \code{\linkS4class{MySQLConnection}} object, produced by
@@ -37,14 +41,14 @@
 
 \item{row.names}{Either \code{TRUE}, \code{FALSE}, \code{NA} or a string.
 
-If \code{TRUE}, always translate row names to a column called "row_names".
-If \code{FALSE}, never translate row names. If \code{NA}, translate
-rownames only if they're a character vector.
+  If \code{TRUE}, always translate row names to a column called "row_names".
+  If \code{FALSE}, never translate row names. If \code{NA}, translate
+  rownames only if they're a character vector.
 
-A string is equivalent to \code{TRUE}, but allows you to override the
-default name.
+  A string is equivalent to \code{TRUE}, but allows you to override the
+  default name.
 
-For backward compatibility, \code{NULL} is equivalent to \code{FALSE}.}
+  For backward compatibility, \code{NULL} is equivalent to \code{FALSE}.}
 
 \item{check.names}{If \code{TRUE}, the default, column names will be
 converted to valid R identifiers.}
@@ -83,6 +87,12 @@ the input file to create the proper table definition. Default is 50.}
 
 \item{quote}{the quote character used in the input file (defaults to
 \code{\"}.)}
+
+\item{conn}{A MySQL connection.}
+
+\item{name}{a character string specifying a table name.}
+
+\item{value}{A data frame.}
 }
 \value{
 A data.frame in the case of \code{dbReadTable}; otherwise a logical
@@ -107,3 +117,4 @@ dbReadTable(con, "mtcars")
 dbReadTable(con, "mtcars", row.names = NULL)
 }
 }
+

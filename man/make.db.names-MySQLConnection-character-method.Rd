@@ -2,9 +2,9 @@
 % Please edit documentation in R/deprecated.R
 \docType{methods}
 \name{make.db.names,MySQLConnection,character-method}
-\alias{make.db.names,MySQLConnection,character-method}
 \alias{SQLKeywords,MySQLConnection-method}
 \alias{isSQLKeyword,MySQLConnection,character-method}
+\alias{make.db.names,MySQLConnection,character-method}
 \title{Make R/S-Plus identifiers into legal SQL identifiers}
 \usage{
 \S4method{make.db.names}{MySQLConnection,character}(dbObj, snames,
@@ -19,3 +19,4 @@
 DEPRECATED: please use \code{dbQuoteIdentifier} instead.
 }
 \keyword{internal}
+

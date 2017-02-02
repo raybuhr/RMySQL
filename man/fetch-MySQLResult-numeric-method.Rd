@@ -11,3 +11,4 @@
 Please use \code{dbFetch} instead
 }
 \keyword{internal}
+

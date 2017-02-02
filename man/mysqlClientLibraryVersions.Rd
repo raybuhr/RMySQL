@@ -17,3 +17,4 @@ This function prints out the compiled and loaded client library versions.
 \examples{
 mysqlClientLibraryVersions()
 }
+
