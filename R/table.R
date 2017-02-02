@@ -263,11 +263,7 @@ setMethod("dbDataType", "MySQLDriver", function(dbObj, obj, ...) {
   )
 })
 
-#' @inheritParams DBI::sqlRownamesToColumn
-#' @param name a character string specifying a table name.
-#' @param value A data frame.
-#' @export
-#' @rdname mysql-tables
+
 setMethod("dbUpsertTable", c("MySQLConnection", "character", "data.frame"),
           function(conn, name, value,
                    row.names = FALSE,
