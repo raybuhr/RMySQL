@@ -242,8 +242,9 @@ setMethod("dbRemoveTable", c("MySQLConnection", "character"),
 #' dbDataType(RMySQL::MySQL(), "a")
 #' dbDataType(RMySQL::MySQL(), 1:3)
 #' dbDataType(RMySQL::MySQL(), 2.5)
-setMethod("dbDataType", "MySQLConnection", function(dbObj, obj, ...) {
-  dbDataType(MySQL(), obj, ...)
+setMethod("dbDataType", "MySQLConnection",
+          function(dbObj, obj, ...) {
+            dbDataType(MySQL(), obj, ...)
 })
 
 #' @export
@@ -263,44 +264,55 @@ setMethod("dbDataType", "MySQLDriver", function(dbObj, obj, ...) {
   )
 })
 
+#' @export
+setGeneric(
+  "dbUpsertTable",
+  function(conn, name, value, row.names = FALSE, temporary = FALSE)
+    standardGeneric("dbUpsertTable")
+)
 
+#' @export
+#' @rdname mysql-tables
+#' @param conn A MySQL connection.
+#' @param name a character string specifying a table name.
+#' @param value A data frame.
 setMethod("dbUpsertTable", c("MySQLConnection", "character", "data.frame"),
-          function(conn, name, value,
-                   row.names = FALSE,
-                   temporary = FALSE,
-                   ...) {
+  function(conn,
+           name,
+           value,
+           row.names = FALSE,
+           temporary = FALSE) {
+    dbBegin(conn)
+    on.exit(dbRollback(conn))
 
-            dbBegin(conn)
-            on.exit(dbRollback(conn))
+    found <- dbExistsTable(conn, name)
+    if (!found) {
+      stop("Table ", name, " does not exist in database", call. = FALSE)
+    }
 
-            found <- dbExistsTable(conn, name)
-            if (!found) {
-              stop("Table ", name, " does not exist in database", call. = FALSE)
-            }
+    if (nrow(value) > 0) {
+      values <- sqlData(conn, value[, , drop = FALSE], row.names)
+      name <- dbQuoteIdentifier(conn, name)
+      fields <- dbQuoteIdentifier(conn, names(values))
+      params <- rep("?", length(fields))
 
-            if (nrow(value) > 0) {
-              values <- sqlData(conn, value[, , drop = FALSE], row.names)
-              name <- dbQuoteIdentifier(conn, name)
-              fields <- dbQuoteIdentifier(conn, names(values))
-              params <- rep("?", length(fields))
+      sql <- paste0(
+        "INSERT INTO ", name, " (", paste0(fields, collapse = ", "), ") ",
+        "VALUES (", paste0(params, collapse = ", "), ") ",
+        "ON DUPLICATE KEY UPDATE SET ",
+        paste(paste0(name, '.', fields, ' = ?'), collapse = ', ')
+      )
+      rs <- dbSendQuery(conn, sql)
+      tryCatch(
+        result_bind_rows(rs@ptr, values),
+        finally = dbClearResult(rs)
+      )
+    }
 
-              sql <- paste0(
-                "INSERT INTO ", name, " (", paste0(fields, collapse = ", "), ") ",
-                "VALUES (", paste0(params, collapse = ", "), ") ",
-                "ON DUPLICATE KEY UPDATE SET ",
-                paste(paste0(name, '.', fields, ' = ?'), collapse = ', ')
-              )
-              rs <- dbSendQuery(conn, sql)
-              tryCatch(
-                result_bind_rows(rs@ptr, values),
-                finally = dbClearResult(rs)
-              )
-            }
+    on.exit(NULL)
+    dbCommit(conn)
 
-            on.exit(NULL)
-            dbCommit(conn)
-
-            TRUE
-          }
+    TRUE
+  }
 )
 
