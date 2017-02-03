@@ -315,7 +315,7 @@ setMethod("dbUpsertTable", c("MySQLConnection", "character", "data.frame"),
 
     if (nrow(value) > 0) {
       table_keys <- dbListTableKeys(conn, name)
-      update_fields <- names(values)[!tolower(names(values)) %in%
+      update_fields <- names(value)[!tolower(names(value)) %in%
                                        tolower(table_keys$table_key)]
 
       if (nrow(table_keys) > 0) {
