@@ -266,6 +266,29 @@ setMethod("dbDataType", "MySQLDriver", function(dbObj, obj, ...) {
 
 #' @export
 setGeneric(
+  "dbListTableKeys",
+  function(conn, name)
+    standardGeneric("dbListTableKeys")
+)
+
+#' @export
+#' @rdname mysql-tables
+#' @param conn A MySQL connection.
+#' @param name a character string specifying a table name.
+setMethod("dbListTableKeys", c("MySQLConnection", "character"),
+   function(conn, name) {
+     sql <- sprintf(
+       paste("SELECT DISTINCT COLUMN_NAME AS table_key",
+      "FROM INFORMATION_SCHEMA.key_column_usage",
+      "WHERE table_name = '%s'"),
+       name)
+     table_keys <- dbGetQuery(conn, sql)
+     return(table_keys)
+   }
+)
+
+#' @export
+setGeneric(
   "dbUpsertTable",
   function(conn, name, value, row.names = FALSE, temporary = FALSE)
     standardGeneric("dbUpsertTable")
@@ -291,22 +314,29 @@ setMethod("dbUpsertTable", c("MySQLConnection", "character", "data.frame"),
     }
 
     if (nrow(value) > 0) {
-      values <- sqlData(conn, value[, , drop = FALSE], row.names)
-      name <- dbQuoteIdentifier(conn, name)
-      fields <- dbQuoteIdentifier(conn, names(values))
-      params <- rep("?", length(fields))
+      table_keys <- dbListTableKeys(conn, name)
+      update_fields <- names(values)[!tolower(names(values)) %in%
+                                       tolower(table_keys$table_key)]
 
-      sql <- paste0(
-        "INSERT INTO ", name, " (", paste0(fields, collapse = ", "), ") ",
-        "VALUES (", paste0(params, collapse = ", "), ") ",
-        "ON DUPLICATE KEY UPDATE SET ",
-        paste(paste0(name, '.', fields, ' = ?'), collapse = ', ')
-      )
-      rs <- dbSendQuery(conn, sql)
-      tryCatch(
-        result_bind_rows(rs@ptr, values),
-        finally = dbClearResult(rs)
-      )
+      if (nrow(table_keys) > 0) {
+        values <- sqlData(conn, value[, , drop = FALSE], row.names)
+        name <- dbQuoteIdentifier(conn, name)
+        fields <- dbQuoteIdentifier(conn, names(values))
+        update_fields <- dbQuoteIdentifier(conn, update_fields)
+        params <- rep("?", length(fields))
+
+        sql <- paste0(
+          "INSERT INTO ", name, " (", paste0(fields, collapse = ", "), ") ",
+          "VALUES (", paste0(params, collapse = ", "), ") ",
+          "ON DUPLICATE KEY UPDATE SET ",
+          paste(paste0(update_fields, ' = ?'), collapse = ', ')
+        )
+        rs <- dbSendQuery(conn, sql)
+        tryCatch(
+          result_bind_rows(rs@ptr, values),
+          finally = dbClearResult(rs)
+        )
+      }
     }
 
     on.exit(NULL)
