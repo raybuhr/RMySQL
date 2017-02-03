@@ -3,6 +3,7 @@
 \docType{methods}
 \name{mysql-tables}
 \alias{dbExistsTable,MySQLConnection,character-method}
+\alias{dbListTableKeys,MySQLConnection,character-method}
 \alias{dbListTables,MySQLConnection-method}
 \alias{dbReadTable,MySQLConnection,character-method}
 \alias{dbRemoveTable,MySQLConnection,character-method}
@@ -29,6 +30,8 @@
 \S4method{dbExistsTable}{MySQLConnection,character}(conn, name, ...)
 
 \S4method{dbRemoveTable}{MySQLConnection,character}(conn, name, ...)
+
+\S4method{dbListTableKeys}{MySQLConnection,character}(conn, name)
 
 \S4method{dbUpsertTable}{MySQLConnection,character,data.frame}(conn, name,
   value, row.names = FALSE, temporary = FALSE)
@@ -87,6 +90,10 @@ the input file to create the proper table definition. Default is 50.}
 
 \item{quote}{the quote character used in the input file (defaults to
 \code{\"}.)}
+
+\item{conn}{A MySQL connection.}
+
+\item{name}{a character string specifying a table name.}
 
 \item{conn}{A MySQL connection.}
 
